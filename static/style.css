@@ -1,0 +1,99 @@
+*
+{
+	padding: 0px;
+	margin: 0px;
+	box-sizing: border-box;
+	font-family: monospace;
+}
+
+:root
+{
+	--dark-0: #333;
+	--dark-1: #2a2a2a;
+	--dark-2: #222;
+	--dark-3: #111;
+
+	--light-0: #aaa;
+	--light-1: #dedede;
+	--light-2: #fff;
+}
+
+body
+{
+	background-color: var(--dark-2);
+}
+
+.container
+{
+    margin: 1rem auto;
+    position: relative;
+    width: calc(100vw - 2rem);
+    max-width: 70rem;
+}
+
+.editor-wrapper
+{
+    display: flex;
+    border: 1px solid #555;
+    position: relative;
+}
+
+.mono
+{
+	font-family: monospace;
+    font-size: 16px;
+    line-height: 1.4;
+    tab-size: 4;
+    -moz-tab-size: 4;
+    white-space: pre;
+    word-wrap: normal;
+}
+
+.line-numbers
+{
+    background-color: transparent;
+    color: var(--light-0);
+    padding: 1rem 0.5rem 1rem 1rem;
+
+    text-align: right;
+    user-select: none;
+    border-right: 1px solid #333;
+    min-width: 50px;
+    overflow: hidden;
+}
+
+.container > .editor-wrapper > .editor
+{
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    background-color: transparent;
+    color: var(--light-1);
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    outline: none;
+    resize: none;
+    caret-color: #fff;
+}
+
+.container > button
+{
+    display: block;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    user-select: none;
+    padding: 4px;
+    background-color: var(--dark-0);
+    color: #eee;
+    z-index: 10;
+    cursor: copy;
+}
+
+.container > button:hover
+{
+    background-color: var(--dark-1);
+}

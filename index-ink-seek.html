@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDE Editor with Line Numbers</title>
+    <style>
+        *
+        {
+            padding: 0px;
+            margin: 0px;
+            box-sizing: border-box;
+            font-family: monospace;
+        }
+        :root
+        {
+            --dark-0: #444;
+            --dark-1: #333;
+            --dark-2: #222;
+            --light-0: #aaa;
+            --light-1: #dedede;
+            --light-2: #fff;
+        }
+        body
+        {
+            background-color: var(--dark-2);
+        }
+        .container
+        {
+            margin: 1rem auto;
+            position: relative;
+            width: calc(100vw - 2rem);
+            max-width: 70rem;
+        }
+        .editor-wrapper
+        {
+            display: flex;
+            border: 1px solid #eee;
+            background-color: var(--dark-0);
+            position: relative;
+        }
+        .line-numbers
+        {
+            background-color: var(--dark-1);
+            color: var(--light-0);
+            padding: 1rem 0.5rem 1rem 1rem;
+            font-size: 16px;
+            line-height: 1.4;
+            text-align: right;
+            user-select: none;
+            border-right: 1px solid #555;
+            min-width: 50px;
+            white-space: pre;
+            overflow: hidden;
+        }
+        .container > .editor-wrapper > .editor
+        {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            background-color: transparent;
+            color: var(--light-1);
+            font-family: monospace;
+            font-size: 16px;
+            line-height: 1.4;
+            tab-size: 4;
+            -moz-tab-size: 4;
+            white-space: pre;
+            overflow-x: auto;
+            overflow-y: hidden;
+            word-wrap: normal;
+            outline: none;
+            resize: none;
+        }
+        .container > button
+        {
+            display: block;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            user-select: none;
+            padding: 4px;
+            background-color: var(--dark-0);
+            color: #eee;
+            cursor: copy;
+            border: 1px solid var(--light-0);
+            z-index: 10;
+        }
+        .container > button:hover
+        {
+            background-color: var(--dark-1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="editor-wrapper">
+            <div class="line-numbers" id="lineNumbers">1</div>
+            <textarea class="editor" spellcheck="false" rows="20">-> knot
+=== knot
+    This is line 3
+    This is line 4
+        Indented line 5
+    Back to line 6</textarea>
+        </div>
+        <button onclick="copyContent()">copy</button>
+    </div>
+
+    <script>
+        // Utility object (mock for demo)
+        const U = {
+            query: (selector) => document.querySelector(selector),
+            css: {
+                h: "color: blue; font-weight: bold;"
+            }
+        };
+
+        function _A() {
+            Gather();
+            console.log("%cGather:", U.css.h, LINE);
+            Logic();
+            InitSeekEvent(U.query(".editor"));
+            updateLineNumbers();
+        }
+
+        function Logic() {
+            // Your logic here
+        }
+
+        let LINE, current_line_index;
+
+        function Gather() {
+            LINE = [];
+            current_line_index = 0;
+        }
+
+        function updateLineNumbers() {
+            const editor = U.query(".editor");
+            const lineNumbersDiv = document.getElementById("lineNumbers");
+            
+            const lines = editor.value.split('\n');
+            const lineCount = lines.length;
+            
+            let lineNumbersText = '';
+            for (let i = 1; i <= lineCount; i++) {
+                lineNumbersText += i + '\n';
+            }
+            
+            lineNumbersDiv.textContent = lineNumbersText.slice(0, -1); // Remove last newline
+        }
+
+        function syncScroll() {
+            const editor = U.query(".editor");
+            const lineNumbers = document.getElementById("lineNumbers");
+            lineNumbers.scrollTop = editor.scrollTop;
+        }
+
+        function InitSeekEvent(editor) {
+            function getIndentationLevel(text) {
+                const match = text.match(/^(\s*)/);
+                return match ? match[1] : '';
+            }
+
+            function getCurrentLineText() {
+                const textarea = editor;
+                const cursorPosition = textarea.selectionStart;
+                const text = textarea.value;
+                
+                // Find the start of current line
+                const textBeforeCursor = text.substring(0, cursorPosition);
+                const lastNewlineIndex = textBeforeCursor.lastIndexOf('\n');
+                const lineStart = lastNewlineIndex === -1 ? 0 : lastNewlineIndex + 1;
+                
+                // Find the end of current line
+                const textFromLineStart = text.substring(lineStart);
+                const nextNewlineIndex = textFromLineStart.indexOf('\n');
+                const lineEnd = nextNewlineIndex === -1 ? text.length : lineStart + nextNewlineIndex;
+                
+                return text.substring(lineStart, lineEnd);
+            }
+
+            function insertTextAtCursor(text) {
+                const textarea = editor;
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const value = textarea.value;
+                
+                // Insert text at cursor position
+                textarea.value = value.substring(0, start) + text + value.substring(end);
+                
+                // Set cursor position after inserted text
+                const newCursorPos = start + text.length;
+                textarea.setSelectionRange(newCursorPos, newCursorPos);
+                
+                // Update line numbers after text change
+                updateLineNumbers();
+            }
+
+            editor.focus();
+            
+            // Update line numbers on any input change
+            editor.addEventListener('input', updateLineNumbers);
+            editor.addEventListener('scroll', syncScroll);
+            
+            editor.onkeydown = e => {
+                if(e.key == "Tab") {
+                    e.preventDefault();
+                    insertTextAtCursor('\t');
+                    if (current_line_index <= LINE.length - 1) {
+                        LINE[current_line_index] += 1;
+                    }
+                }
+                
+                if(e.key == "Enter") {
+                    e.preventDefault();
+                    
+                    // Get the current line text
+                    const currentLineText = getCurrentLineText();
+                    
+                    // Get the indentation (leading whitespace) of current line
+                    const indentation = getIndentationLevel(currentLineText);
+                    
+                    // Insert newline + indentation
+                    const newLineWithIndent = '\n' + indentation;
+                    insertTextAtCursor(newLineWithIndent);
+                    
+                    console.log('Current line:', currentLineText);
+                    console.log('Indentation:', JSON.stringify(indentation));
+                    console.log('LINE array:', LINE);
+                    
+                    LINE.push(0);
+                    current_line_index += 1;
+                }
+            }
+        }
+
+        function copyContent() {
+            const editor = document.querySelector('.editor');
+            const text = editor.value;
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    console.log('Content copied to clipboard');
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                });
+            } else {
+                // Fallback for older browsers
+                editor.select();
+                document.execCommand('copy');
+                console.log('Content copied to clipboard (fallback)');
+            }
+        }
+
+        // Initialize the editor
+        _A();
+    </script>
+</body>
+</html>
