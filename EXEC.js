@@ -23,7 +23,7 @@ function Gather()
 
 
 
-function InitSeekEvent(editor) {
+function InitSeekEvent(editor, btn_copy) {
 function updateLineNumbers() {
     const editor = U.query(".editor");
     const lineNumbersDiv = document.getElementById("lineNumbers");
@@ -121,27 +121,25 @@ function syncScroll() {
     }
 
     updateLineNumbers();
-}
 
-function copyContent() {
-    const editor = document.querySelector('.editor');
-    const text = editor.value;
+    btn_copy.onclick = () => 
+    {
+        const text = editor.value;
     
-    if (navigator.clipboard) {
-        navigator.clipboard.writeText(text).then(() => {
-            console.log('Content copied to clipboard');
-        }).catch(err => {
-            console.error('Failed to copy: ', err);
-        });
-    } else {
-        // Fallback for older browsers
-        editor.select();
-        document.execCommand('copy');
-        console.log('Content copied to clipboard (fallback)');
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(() => {
+                console.log('Content copied to clipboard');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        } else {
+            // Fallback for older browsers
+            editor.select();
+            document.execCommand('copy');
+            console.log('Content copied to clipboard (fallback)');
+        }
     }
 }
-
-
 
 
 _A();
