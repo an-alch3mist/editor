@@ -234,7 +234,7 @@ function InitSeekEvent(editor, btn_copy, checkbox_wrap) {
         }
         
         // Update line numbers when wrap mode changes
-        setTimeout(updateLineNumbers, 50);
+        setTimeout(updateLineNumbers, 5);
     }
 
 }
