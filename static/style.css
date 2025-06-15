@@ -16,6 +16,9 @@
 	--light-0: #777;
 	--light-1: #dedede;
 	--light-2: #fff;
+
+    --border: #555;
+    --border-thin: #333;
 }
 
 body
@@ -34,7 +37,7 @@ body
 .editor-wrapper
 {
     display: flex;
-    border: 1px solid #555;
+    border: 1px solid var(--border);
     position: relative;
 }
 
@@ -79,9 +82,12 @@ body
     caret-color: #fff;
 }
 
-.container > button
+.container > .func
 {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
     position: absolute;
     top: 10px;
     right: 10px;
@@ -93,7 +99,45 @@ body
     cursor: copy;
 }
 
-.container > button:hover
+.copy
 {
-    background-color: var(--dark-1);
+    display: block;
+    background-color: transparent;
+    padding: 4px;
+    color: #eee;
+    height: 100%;
+    width: auto;
+}
+
+.word-wrap
+{
+    display: block;
+    background-color: transparent;
+    accent-color: transparent;
+
+    height: 24px;
+    width: 24px;
+}
+
+.word-wrap-enable  { word-wrap: break-word; white-space:pre-wrap; overflow-x: hidden;}
+.word-wrap-disable { word-wrap: normal; white-space:pre ; overflow-x: auto;}
+
+
+.footer
+{
+    display: block;
+    width: 100%;
+    height: auto;
+    user-select: none;
+
+    font-style: italic;
+    font-size: 14px;
+
+    text-align: right;
+
+    color: #555;
+    padding: 10px;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    border-left: 1px solid var(--border);
 }

@@ -1,11 +1,10 @@
 function _A()
 {
+    Gather();
+    console.log("%cGather:", U.css.h, LINE);
 
-	Gather();
-	console.log("%cGather:", U.css.h, LINE);
-
-	Logic();
-	InitSeekEvent(U.query(".editor"), U.query(".copy"));
+    Logic();
+    InitSeekEvent(U.query(".editor"), U.query(".copy"), U.query(".word-wrap"));
 }
 
 function Logic()
@@ -16,33 +15,97 @@ function Logic()
 let LINE, current_line_index;
 function Gather()
 {
-	LINE = [];
-	current_line_index = 0;
+    LINE = [];
+    current_line_index = 0;
 }
 
-
-
-
-function InitSeekEvent(editor, btn_copy) {
-function updateLineNumbers() {
-    const editor = U.query(".editor");
-    const lineNumbersDiv = document.getElementById("lineNumbers");
+function InitSeekEvent(editor, btn_copy, checkbox_wrap) {
     
-    const lines = editor.value.split('\n');
-    const lineCount = lines.length;
-    
-    let lineNumbersText = '';
-    for (let i = 1; i <= lineCount; i++) {
-        lineNumbersText += i + '\n';
+    function getCharacterWidth() {
+        // Create a temporary element to measure character width
+        const temp = document.createElement('span');
+        temp.style.font = window.getComputedStyle(editor).font;
+        temp.style.position = 'absolute';
+        temp.style.visibility = 'hidden';
+        temp.style.whiteSpace = 'pre';
+        temp.textContent = 'M'; // Use 'M' as it's typically the widest character in monospace
+        document.body.appendChild(temp);
+        const width = temp.getBoundingClientRect().width;
+        document.body.removeChild(temp);
+        return width;
     }
     
-    lineNumbersDiv.textContent = lineNumbersText.slice(0, -1); // Remove last newline
-}
-function syncScroll() {
-    const editor = U.query(".editor");
-    const lineNumbers = document.getElementById("lineNumbers");
-    lineNumbers.scrollTop = editor.scrollTop;
-}
+    function getWrappedLineCount(text, editorWidth) {
+        if (!text) return 1;
+        
+        const charWidth = getCharacterWidth();
+        const tabWidth = charWidth * 4; // Tab size is 4 from CSS
+        
+        let visualWidth = 0;
+        let lines = 1;
+        
+        for (let i = 0; i < text.length; i++) {
+            const char = text[i];
+            
+            if (char === '\t') {
+                // Calculate tab stop position
+                const tabStops = Math.floor(visualWidth / tabWidth);
+                visualWidth = (tabStops + 1) * tabWidth;
+            } else {
+                visualWidth += charWidth;
+            }
+            
+            if (visualWidth > editorWidth) {
+                lines++;
+                visualWidth = char === '\t' ? tabWidth : charWidth;
+            }
+        }
+        
+        return lines;
+    }
+
+    function updateLineNumbers() {
+        const editor = U.query(".editor");
+        const lineNumbersDiv = document.getElementById("lineNumbers");
+        const isWrapEnabled = checkbox_wrap.checked;
+        
+        const lines = editor.value.split('\n');
+        const lineCount = lines.length;
+        
+        let lineNumbersText = '';
+        
+        if (isWrapEnabled) {
+            // Calculate wrapped lines more accurately
+            const editorWidth = editor.clientWidth - 32; // Account for padding (1rem each side = 32px)
+            
+            for (let i = 0; i < lineCount; i++) {
+                const lineText = lines[i];
+                const wrappedLines = getWrappedLineCount(lineText, editorWidth);
+                
+                // Add the actual line number
+                lineNumbersText += (i + 1) + '\n';
+                
+                // Add empty lines for wrapped portions
+                for (let j = 1; j < wrappedLines; j++) {
+                    lineNumbersText += '\n';
+                }
+            }
+        } else {
+            // Standard line numbering when wrap is disabled
+            for (let i = 1; i <= lineCount; i++) {
+                lineNumbersText += i + '\n';
+            }
+        }
+        
+        lineNumbersDiv.textContent = lineNumbersText.slice(0, -1); // Remove last newline
+    }
+
+    function syncScroll() {
+        const editor = U.query(".editor");
+        const lineNumbers = document.getElementById("lineNumbers");
+        lineNumbers.scrollTop = editor.scrollTop;
+    }
+    
     function getIndentationLevel(text) {
         const match = text.match(/^(\s*)/);
         return match ? match[1] : '';
@@ -89,6 +152,11 @@ function syncScroll() {
     editor.addEventListener('input', updateLineNumbers);
     editor.addEventListener('scroll', syncScroll);
     
+    // Update line numbers when window is resized (affects wrapping)
+    window.addEventListener('resize', () => {
+        setTimeout(updateLineNumbers, 100);
+    });
+    
     editor.onkeydown = e => {
         if(e.key == "Tab") {
             e.preventDefault();
@@ -120,6 +188,11 @@ function syncScroll() {
         }
     }
 
+    editor.oninput = e => {
+        U.query(".footer").innerHTML = `[char_count] = ${editor.value.length}`;
+    }
+
+    // Initialize line numbers
     updateLineNumbers();
 
     btn_copy.onclick = () => 
@@ -127,7 +200,7 @@ function syncScroll() {
         const text = editor.value;
     
         if (navigator.clipboard) {
-            navigator.clipboard.writeText(text).then(() => {
+            navigator.clipboard.writeText("```\n" + text + "\n```").then(() => {
                 console.log('Content copied to clipboard');
             }).catch(err => {
                 console.error('Failed to copy: ', err);
@@ -139,7 +212,31 @@ function syncScroll() {
             console.log('Content copied to clipboard (fallback)');
         }
     }
-}
 
+    /*
+     todo, fix issue when line number doesn't aligh twith the wrap
+     for now use wrap only when reading txt document written in a long single line
+    */
+    checkbox_wrap.onclick = () => 
+    {
+        if(checkbox_wrap.checked)
+        {
+            if(editor.value.length != 0) // to resolve glitch of overflow clipping when switch wrap is made
+                if(editor.value.split('').gl(0) != '\n')
+                    editor.value += '\n';
+            editor.classList.add("word-wrap-enable");
+            editor.classList.remove("word-wrap-disable");
+        }
+        else
+        {
+            editor.classList.remove("word-wrap-enable");
+            editor.classList.add("word-wrap-disable");
+        }
+        
+        // Update line numbers when wrap mode changes
+        setTimeout(updateLineNumbers, 50);
+    }
+
+}
 
 _A();

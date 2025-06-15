@@ -14,3 +14,15 @@ let U =
 		`,
 	}
 };
+
+/*
+	at index: 0, return last element in list
+	at index: .length - 1, return first element of the list
+*/
+Array.prototype.gl = function(index) 
+{
+	if(index < 0 || index > this.length - 1)
+		console.error(`gl index ${index} out of bounds from [0, ${this,length - 1}]`);
+
+	return this[this.length - 1 - index];
+};
