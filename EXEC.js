@@ -177,7 +177,7 @@ function InitSeekEvent(editor, btn_copy, checkbox_wrap) {
     function showCopyAlert() {
         // Create alert element
         const alert = document.createElement('div');
-        alert.textContent = 'Copied!';
+        alert.textContent = "copy";
         alert.style.cssText = `
             position: fixed;
             top: 50%;
@@ -185,13 +185,13 @@ function InitSeekEvent(editor, btn_copy, checkbox_wrap) {
             transform: translate(-50%, -50%);
             background-color: #333;
             color: #fff;
-            padding: 6px 12px;
+            padding: 6px;
             border-radius: 4px;
             font-family: monospace;
-            font-size: 12px;
+            font-size: 13px;
             z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.2s ease;
+            opacity: 0.8;
+            transition: opacity 0.2s ease-in-out;
             pointer-events: none;
         `;
         
@@ -275,7 +275,7 @@ function InitSeekEvent(editor, btn_copy, checkbox_wrap) {
     }
 
     editor.oninput = e => {
-        U.query(".footer").innerHTML = `[word-wrap] = ${checkbox_wrap.checked}, [char_count] = ${editor.value.length}`;
+        U.query(".footer").innerHTML = `&lt;triple tap to select all + copy&gt;, [word-wrap] = ${checkbox_wrap.checked}, [char_count] = ${editor.value.length}`;
     }
 
     // Initialize line numbers
@@ -306,7 +306,7 @@ function InitSeekEvent(editor, btn_copy, checkbox_wrap) {
         }
         
         // update footer
-        U.query(".footer").innerHTML = `[word-wrap] = ${checkbox_wrap.checked}, [char_count] = ${editor.value.length}`;
+        U.query(".footer").innerHTML = `&lt;tiple tap to select all + copy&gt;, [word-wrap] = ${checkbox_wrap.checked}, [char_count] = ${editor.value.length}`;
         // Update line numbers when wrap mode changes
         setTimeout(updateLineNumbers, 5);
     }
