@@ -189,7 +189,7 @@ function InitSeekEvent(editor, btn_copy, checkbox_wrap) {
     }
 
     editor.oninput = e => {
-        U.query(".footer").innerHTML = `[char_count] = ${editor.value.length}`;
+        U.query(".footer").innerHTML = `[word-wrap] = ${checkbox_wrap.checked}, [char_count] = ${editor.value.length}`;
     }
 
     // Initialize line numbers
@@ -233,6 +233,8 @@ function InitSeekEvent(editor, btn_copy, checkbox_wrap) {
             editor.classList.add("word-wrap-disable");
         }
         
+        // update footer
+        U.query(".footer").innerHTML = `[word-wrap] = ${checkbox_wrap.checked}, [char_count] = ${editor.value.length}`;
         // Update line numbers when wrap mode changes
         setTimeout(updateLineNumbers, 5);
     }
