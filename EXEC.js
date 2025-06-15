@@ -21,6 +21,11 @@ function Gather()
 
 function InitSeekEvent(editor, btn_copy, checkbox_wrap) {
     
+    // Triple-click detection variables
+    let clickCount = 0;
+    let clickTimeout;
+    const TRIPLE_CLICK_DELAY = 400; // 400ms gap between clicks
+    
     function getCharacterWidth() {
         // Create a temporary element to measure character width
         const temp = document.createElement('span');
@@ -146,7 +151,88 @@ function InitSeekEvent(editor, btn_copy, checkbox_wrap) {
         updateLineNumbers();
     }
 
+    function copyTextToClipboard() {
+        const text = editor.value;
+        
+        // Select all text in the editor
+        editor.select();
+        editor.setSelectionRange(0, text.length);
+    
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText("```\n" + text + "\n```").then(() => {
+                console.log('Content copied to clipboard');
+                showCopyAlert();
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        } else {
+            // Fallback for older browsers
+            editor.select();
+            document.execCommand('copy');
+            console.log('Content copied to clipboard (fallback)');
+            showCopyAlert();
+        }
+    }
+
+    function showCopyAlert() {
+        // Create alert element
+        const alert = document.createElement('div');
+        alert.textContent = 'Copied!';
+        alert.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #333;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+        `;
+        
+        document.body.appendChild(alert);
+        
+        // Fade in
+        setTimeout(() => {
+            alert.style.opacity = '1';
+        }, 10);
+        
+        // Fade out and remove after 1 second
+        setTimeout(() => {
+            alert.style.opacity = '0';
+            setTimeout(() => {
+                document.body.removeChild(alert);
+            }, 300);
+        }, 500);
+    }
+
+    function handleTripleClick() {
+        clickCount++;
+        
+        // Clear existing timeout
+        clearTimeout(clickTimeout);
+        
+        if (clickCount === 3) {
+            // Triple click detected
+            copyTextToClipboard();
+            clickCount = 0; // Reset counter
+        } else {
+            // Set timeout to reset counter if no more clicks
+            clickTimeout = setTimeout(() => {
+                clickCount = 0;
+            }, TRIPLE_CLICK_DELAY);
+        }
+    }
+
     editor.focus();
+    
+    // Add triple-click event listener
+    editor.addEventListener('click', handleTripleClick);
     
     // Update line numbers on any input change
     editor.addEventListener('input', updateLineNumbers);
@@ -195,22 +281,8 @@ function InitSeekEvent(editor, btn_copy, checkbox_wrap) {
     // Initialize line numbers
     updateLineNumbers();
 
-    btn_copy.onclick = () => 
-    {
-        const text = editor.value;
-    
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText("```\n" + text + "\n```").then(() => {
-                console.log('Content copied to clipboard');
-            }).catch(err => {
-                console.error('Failed to copy: ', err);
-            });
-        } else {
-            // Fallback for older browsers
-            editor.select();
-            document.execCommand('copy');
-            console.log('Content copied to clipboard (fallback)');
-        }
+    btn_copy.onclick = () => {
+        copyTextToClipboard();
     }
 
     /*

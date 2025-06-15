@@ -101,7 +101,8 @@ body
 
 .copy
 {
-    display: block;
+/*    display: block;*/
+    display: none; /* hide bopy button for now */
     background-color: transparent;
     padding: 4px;
     color: #eee;
