@@ -274,8 +274,10 @@ function InitSeekEvent(editor, btn_copy, checkbox_wrap) {
         }
     }
 
+    let footer_text = `[word-wrap] = ${checkbox_wrap.checked}, [char_count] = ${editor.value.length}`;
+
     editor.oninput = e => {
-        U.query(".footer").innerHTML = `&lt;triple tap to select all + copy&gt;, [word-wrap] = ${checkbox_wrap.checked}, [char_count] = ${editor.value.length}`;
+        U.query(".footer").innerHTML = footer_text;
     }
 
     // Initialize line numbers
@@ -306,7 +308,7 @@ function InitSeekEvent(editor, btn_copy, checkbox_wrap) {
         }
         
         // update footer
-        U.query(".footer").innerHTML = `&lt;tiple tap to select all + copy&gt;, [word-wrap] = ${checkbox_wrap.checked}, [char_count] = ${editor.value.length}`;
+        U.query(".footer").innerHTML = footer_text;
         // Update line numbers when wrap mode changes
         setTimeout(updateLineNumbers, 5);
     }

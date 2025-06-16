@@ -82,14 +82,14 @@ body
     caret-color: #fff;
 }
 
-.container > .func
+.func
 {
     display: flex;
     align-items: center;
     gap: 8px;
 
-    position: absolute;
-    top: 10px;
+    position: absolute !important;
+    bottom: 10px;
     right: 10px;
     user-select: none;
     padding: 4px;
@@ -99,12 +99,16 @@ body
     cursor: copy;
 }
 
-.copy
+.func > *
 {
-/*    display: block;*/
-    display: none; /* hide bopy button for now */
+    display: block;
     background-color: transparent;
     padding: 4px;
+}
+
+.copy
+{
+    display: block;
     color: #eee;
     height: 100%;
     width: auto;
@@ -112,10 +116,8 @@ body
 
 .word-wrap
 {
-    display: block;
     background-color: transparent;
     accent-color: transparent;
-
     height: 24px;
     width: 24px;
 }
@@ -141,4 +143,6 @@ body
     border-right: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
     border-left: 1px solid var(--border);
+
+    white-space: pre-wrap;
 }
