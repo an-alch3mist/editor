@@ -102,26 +102,21 @@ body
 .func > *
 {
     display: block;
-    background-color: transparent;
-    padding: 4px;
+    padding: 5px;
 }
-
-.copy
+.func > button
 {
-    display: block;
+    background-color: transparent;
     color: #eee;
-    height: 100%;
     width: auto;
+    height: 100%;
 }
-
-.word-wrap
+.func > input[type = "checkbox"]
 {
-    background-color: transparent;
     accent-color: transparent;
-    height: 24px;
     width: 24px;
+    height: 24px;
 }
-
 .word-wrap-enable  { word-wrap: break-word; white-space:pre-wrap; overflow-x: hidden;}
 .word-wrap-disable { word-wrap: normal; white-space:pre ; overflow-x: auto;}
 
@@ -131,6 +126,7 @@ body
     display: block;
     width: 100%;
     height: auto;
+    padding: 10px;
     user-select: none;
 
     font-style: italic;
@@ -139,10 +135,9 @@ body
     text-align: right;
 
     color: #555;
-    padding: 10px;
+    white-space: pre-wrap !important;
+    
     border-right: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
     border-left: 1px solid var(--border);
-
-    white-space: pre-wrap;
 }

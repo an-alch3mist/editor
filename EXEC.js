@@ -4,7 +4,14 @@ function _A()
     console.log("%cGather:", U.css.h, LINE);
 
     Logic();
-    InitSeekEvent(U.query(".editor"), U.query(".copy"), U.query(".word-wrap"));
+    InitSeekEvent(
+        U.query(".editor"), 
+        U.query(".copy"), 
+        U.query(".copy_code"), 
+        U.query(".paste"), 
+        U.query(".word-wrap"),
+        U.query(".footer")
+    );
 }
 
 function Logic()
@@ -19,7 +26,7 @@ function Gather()
     current_line_index = 0;
 }
 
-function InitSeekEvent(editor, btn_copy, checkbox_wrap) {
+function InitSeekEvent(editor, btn_copy, btn_copy_code, btn_paste, checkbox_wrap, footer) {
     
     // Triple-click detection variables
     let clickCount = 0;
@@ -151,33 +158,17 @@ function InitSeekEvent(editor, btn_copy, checkbox_wrap) {
         updateLineNumbers();
     }
 
-    function copyTextToClipboard() {
-        const text = editor.value;
-        
+
+    function selectAllText()
+    {
         // Select all text in the editor
         editor.select();
-        editor.setSelectionRange(0, text.length);
-    
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText("```\n" + text + "\n```").then(() => {
-                console.log('Content copied to clipboard');
-                showCopyAlert();
-            }).catch(err => {
-                console.error('Failed to copy: ', err);
-            });
-        } else {
-            // Fallback for older browsers
-            editor.select();
-            document.execCommand('copy');
-            console.log('Content copied to clipboard (fallback)');
-            showCopyAlert();
-        }
+        editor.setSelectionRange(0, text.length); // for mobile
     }
-
-    function showCopyAlert() {
+    function showAlert(text) {
         // Create alert element
         const alert = document.createElement('div');
-        alert.textContent = "copy";
+        alert.textContent = text;
         alert.style.cssText = `
             position: fixed;
             top: 50%;
@@ -210,6 +201,16 @@ function InitSeekEvent(editor, btn_copy, checkbox_wrap) {
             }, 300);
         }, 500);
     }
+    function copyTextToClipboard(start_with = '', end_with = '') {
+        const text = editor.value;
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(start_with + text + end_with).then(() => {
+                console.log('Content copied to clipboard');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
+    }
 
     function handleTripleClick() {
         clickCount++;
@@ -220,6 +221,7 @@ function InitSeekEvent(editor, btn_copy, checkbox_wrap) {
         if (clickCount === 3) {
             // Triple click detected
             copyTextToClipboard();
+            selectAllText();
             clickCount = 0; // Reset counter
         } else {
             // Set timeout to reset counter if no more clicks
@@ -274,10 +276,10 @@ function InitSeekEvent(editor, btn_copy, checkbox_wrap) {
         }
     }
 
-    let footer_text = `[word-wrap] = ${checkbox_wrap.checked}, [char_count] = ${editor.value.length}`;
+    let get_footer_text = () => `[word-wrap] = ${checkbox_wrap.checked}, [char_count] = ${editor.value.length}`;
 
     editor.oninput = e => {
-        U.query(".footer").innerHTML = footer_text;
+        footer.innerHTML = get_footer_text();
     }
 
     // Initialize line numbers
@@ -285,7 +287,24 @@ function InitSeekEvent(editor, btn_copy, checkbox_wrap) {
 
     btn_copy.onclick = () => {
         copyTextToClipboard();
+        showAlert("copy");
     }
+
+    btn_copy_code.onclick = () => {
+        copyTextToClipboard("```\n", "\n```");
+        showAlert("copy_code");
+    }
+
+    btn_paste.onclick = async () => {
+        try {
+            const text = await navigator.clipboard.readText();
+            insertTextAtCursor(text);
+        } catch (err) {
+            console.error('Failed to read clipboard contents: ', err);
+        }
+        showAlert("paste");
+        updateLineNumbers();
+   }
 
     /*
      todo, fix issue when line number doesn't aligh twith the wrap
@@ -308,7 +327,7 @@ function InitSeekEvent(editor, btn_copy, checkbox_wrap) {
         }
         
         // update footer
-        U.query(".footer").innerHTML = footer_text;
+        footer.innerHTML = get_footer_text();
         // Update line numbers when wrap mode changes
         setTimeout(updateLineNumbers, 5);
     }
